@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./EMDR42Chat.API/Dockerfile
+    ports:
+      - '5277:5277'
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Http:/home/app/.aspnet/http:ro
+    networks:
+      - emdr42_services
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=5277
+      - DB_HOST
+      - DB_PORT
+      - DB_PROFILE_NAME
+      - DB_USER
+      - DB_PASSWORD
+      - JWT_KEY
+      - JWT_ISSUER
+
+networks:
+  emdr42_services:
+    external: true
