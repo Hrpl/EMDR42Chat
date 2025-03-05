@@ -5,4 +5,42 @@ on:
     branches:
       - master
 
+jobs:
+  deploy:
+    name: Deploy project to VPS
+    runs-on: ubuntu-latest
+
+    steps:
+      # Проверка кода из репозитория
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Delete old repository from VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            rm -rf /root/EMDR42Services/EMDR42Chat
+
+
+      # Установка соединения с VPS и деплой
+      - name: Deploy application via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          passphrase: "" # Укажите, если ключ защищён паролем
+          script: |
+            # Обновление или клонирование репозитория
+            git clone https://${{ secrets.VPS_AUTH }}@github.com/Hrpl/EMDR42Chat.git /root/EMDR42Services/EMDR42Chat
+            
+
+            # Перемещение в директорию проекта
+            cd /root/EMDR42Services/EMDR42Chat/
+            docker-compose down
+            docker-compose pull
+            docker-compose --env-file ../.env up -d --build
             
