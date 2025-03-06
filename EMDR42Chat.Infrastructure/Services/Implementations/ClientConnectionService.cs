@@ -8,7 +8,7 @@ namespace EMDR42Chat.Infrastructure.Services.Implementations;
 
 public class ClientConnectionService(IDbConnectionManager connection) : IClientConnectionService
 {
-    private const string TableName = "table";
+    private const string TableName = "client_connections";
     private readonly QueryFactory _query = connection.PostgresQueryFactory;
     public async Task<int> CreateAsync(ClientConnectionModel model)
     {
