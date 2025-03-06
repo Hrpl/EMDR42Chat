@@ -15,23 +15,26 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using EMDR42Chat.Infrastructure.Services.Interfaces;
 using EMDR42Chat.Domain.Commons.DTO;
 using EMDR42Chat.Domain.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Hubs;
 
-public class ChatHub(IClientConnectionService client) : Hub
+public class ChatHub(IClientConnectionService client, ILogger<ChatHub> logger) : Hub
 {
     private readonly IClientConnectionService _client = client;
+    private readonly ILogger<ChatHub> _logger = logger;
 
     public async Task SendMessageToUser(ChatRequest request, string email)
     {
         var connectionId = await _client.GetConnectionId(email);
-        await Clients.Client(connectionId).SendAsync("ReceiveMessage", request);
+        await this.Clients.Client(connectionId).SendAsync("ReceiveMessage", request);
     }
 
+    
     public override async Task OnConnectedAsync()
     {
         var email = Context.GetHttpContext().Request.Query["email"].ToString();
-
+        _logger.LogError(email);
         var connection = Context.ConnectionId;
 
         var model = new ClientConnectionModel

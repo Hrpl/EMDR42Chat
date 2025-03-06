@@ -24,7 +24,8 @@ app.UseCors(o => o.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod());
 
 app.UseHttpsRedirection();
 
-app.MapHub<ChatHub>("/hub");
+
 app.MapControllers();
+app.MapHub<ChatHub>("/hub");
 
 app.Run();
