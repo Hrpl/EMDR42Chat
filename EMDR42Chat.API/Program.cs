@@ -14,8 +14,6 @@ builder.Services.AddServices();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors();
-builder.Services.AddAuthentication();
-builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -26,8 +24,6 @@ app.UseCors(o => o.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod());
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication();
-app.UseAuthorization();
 app.MapHub<ChatHub>("/hub");
 app.MapControllers();
 

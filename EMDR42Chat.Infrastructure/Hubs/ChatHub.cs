@@ -18,7 +18,6 @@ using EMDR42Chat.Domain.Models;
 
 namespace Infrastructure.Hubs;
 
-[Authorize]
 public class ChatHub(IClientConnectionService client) : Hub
 {
     private readonly IClientConnectionService _client = client;
