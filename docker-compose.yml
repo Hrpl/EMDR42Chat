@@ -17,7 +17,7 @@ services:
       - ASPNETCORE_HTTP_PORTS=5277
       - DB_HOST
       - DB_PORT
-      - DB_PROFILE_NAME
+      - DB_CHAT_NAME
       - DB_USER
       - DB_PASSWORD
       - JWT_KEY
