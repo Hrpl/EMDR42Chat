@@ -24,7 +24,7 @@ public class ChatHub(IClientConnectionService client, ILogger<ChatHub> logger) :
     private readonly IClientConnectionService _client = client;
     private readonly ILogger<ChatHub> _logger = logger;
 
-    public async Task SendMessageToUser(string request, string email)
+    public async Task SendMessageToUser(ChatDataDTO request, string email)
     {
         var connectionId = await _client.GetConnectionId(email);
         await this.Clients.Client(connectionId).SendAsync("ReceiveMessage", request);
