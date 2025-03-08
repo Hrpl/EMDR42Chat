@@ -20,7 +20,7 @@ public class ChatDataDTO
     public int TypeSound { get; set; }
     public int Volume { get; set; }
     public int SoundMode { get; set; }
-    public int Efect { get; set; }
+    public int Effect { get; set; }
     public int Repeat { get; set; }
     public int View { get; set; }
     public int TypeAnimation { get; set; }

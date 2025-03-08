@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using EMDR42Chat.Domain.Commons.DTO;
+using Microsoft.AspNetCore.Mvc;
 
 
 namespace EMDR42Chat.API.Controllers;
