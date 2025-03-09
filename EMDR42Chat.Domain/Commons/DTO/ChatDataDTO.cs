@@ -25,5 +25,8 @@ public class ChatDataDTO
     public int View { get; set; }
     public int TypeAnimation { get; set; }
     public int Figure { get; set; }
-    public bool IsShowFigure { get; set; }
+
+    public string Color { get; set; }
+    public string ColorCenter { get; set; }
+    public string Background { get; set; }
 }
