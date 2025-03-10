@@ -16,7 +16,7 @@ public class ChatDataDTO
     public int TypeAnimation { get; set; } = 1;
     public int Figure { get; set; } = 1;
 
-    public string Color { get; set; } = "1";
-    public string ColorCenter { get; set; } = "1";
-    public string Background { get; set; } = "1";
+    public int Color { get; set; } = 1;
+    public int ColorCenter { get; set; } = 1;
+    public int Background { get; set; } = 1;
 }
