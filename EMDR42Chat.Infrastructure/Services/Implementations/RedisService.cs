@@ -14,6 +14,11 @@ public class RedisService : IRedisService
     }
     public async Task DeleteAsync(string key)
     {
+        if (key == null)
+        {
+            throw new ArgumentNullException(nameof(key), "Key cannot be null");
+        }
+
         await _db.StringGetDeleteAsync(key);
     }
 

@@ -80,8 +80,12 @@ public class ChatHub(IClientConnectionService client, IRedisService redisService
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         var email = await _client.GetEmailAsync(Context.ConnectionId);
-        await _redisService.DeleteAsync(email);
-        await _client.DeleteByConnectionId(Context.ConnectionId);
+        if (email != null)
+        {
+            await _client.DeleteByConnectionId(Context.ConnectionId);
+            await _redisService.DeleteAsync(email);
+        }
+        
         await base.OnDisconnectedAsync(exception);
     }
 
