@@ -45,7 +45,7 @@ public class ChatHub(IClientConnectionService client, IRedisService redisService
         var connection = Context.ConnectionId;
         if(!string.IsNullOrEmpty(email)) 
         {
-            var result = _client.GetConnectionId(email);
+            var result = await _client.GetConnectionId(email);
 
             if (result != null)
             {
