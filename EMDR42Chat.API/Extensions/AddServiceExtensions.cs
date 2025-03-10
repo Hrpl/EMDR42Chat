@@ -28,7 +28,7 @@ public static class AddServiceExtensions
     {
         var options = new ConfigurationOptions
         {
-            EndPoints = { "127.0.0.1:6379" },
+            EndPoints = { Environment.GetEnvironmentVariable("REDIS_HOST") },
             AbortOnConnectFail = false, // Не прерывать подключение при ошибке
             ConnectRetry = 5, // Количество попыток подключения
             ConnectTimeout = 5000 // Таймаут подключения
