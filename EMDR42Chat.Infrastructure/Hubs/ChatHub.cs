@@ -72,7 +72,7 @@ public class ChatHub(IClientConnectionService client, IRedisService redisService
             responseObject = System.Text.Json.JsonSerializer.Deserialize<ChatDataDTO>(json);
         }
         
-        await Clients.Caller.SendAsync("ReceiveMessage", responseObject);
+        await Clients.Caller.SendAsync("InitialData", responseObject);
 
         await base.OnConnectedAsync();
     }
