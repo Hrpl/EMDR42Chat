@@ -8,6 +8,7 @@ using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 using System.Reflection;
 using System.Text;
 
@@ -20,13 +21,35 @@ public static class AddServiceExtensions
         services.AddMapster();
         services.AddRegisterService();
         services.AddOpenAPI();
+        services.AddRedis();
+    }
+
+    public static void AddRedis(this IServiceCollection services)
+    {
+        var options = new ConfigurationOptions
+        {
+            EndPoints = { "localhost:6379" },
+            AbortOnConnectFail = false, // Не прерывать подключение при ошибке
+            ConnectRetry = 5, // Количество попыток подключения
+            ConnectTimeout = 5000 // Таймаут подключения
+        };
+
+        // Регистрируем ConnectionMultiplexer как Singleton
+        services.AddSingleton<IConnectionMultiplexer>(sp =>
+            ConnectionMultiplexer.Connect(options)
+        );
+
+        // Регистрируем IDatabase как Scoped (или Singleton, если нужно)
+        services.AddScoped<IDatabase>(sp =>
+            sp.GetRequiredService<IConnectionMultiplexer>().GetDatabase()
+        );
     }
     public static void AddOpenAPI(this IServiceCollection services)
     {
         services.AddSwaggerGen(c =>
             {
                 c.EnableAnnotations();
-                c.AddServer(new OpenApiServer { Url = "/api/at" });
+                //c.AddServer(new OpenApiServer { Url = "/api/at" });
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Repositories", Version = "v2024" });
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -65,5 +88,6 @@ public static class AddServiceExtensions
         services.AddSingleton<Config>();
         services.AddScoped<IDbConnectionManager, DbConnectionManager>();
         services.AddScoped<IClientConnectionService, ClientConnectionService>();
+        services.AddScoped<IRedisService, RedisService>();
     }
 }

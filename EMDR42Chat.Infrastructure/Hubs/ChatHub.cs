@@ -19,38 +19,69 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Hubs;
 
-public class ChatHub(IClientConnectionService client, ILogger<ChatHub> logger) : Hub
+public class ChatHub(IClientConnectionService client, IRedisService redisService, ILogger<ChatHub> logger) : Hub
 {
     private readonly IClientConnectionService _client = client;
     private readonly ILogger<ChatHub> _logger = logger;
+    private readonly IRedisService _redisService = redisService ?? throw new ArgumentNullException(nameof(redisService));
 
     public async Task SendMessageToUser(ChatDataDTO request, string email)
     {
         var connectionId = await _client.GetConnectionId(email);
+        string json = System.Text.Json.JsonSerializer.Serialize(request);
+
+        await _redisService.SetValueAsync(email, json);
         await this.Clients.Client(connectionId).SendAsync("ReceiveMessage", request);
     }
 
     
     public override async Task OnConnectedAsync()
     {
+        //параметр запроса у клиента
         var email = Context.GetHttpContext().Request.Query["email"].ToString();
-        _logger.LogError(email);
+        //параметр запроса психотерапевта
+        var clientEmail = Context.GetHttpContext().Request.Query["client-email"].ToString();
+
         var connection = Context.ConnectionId;
-
-        var model = new ClientConnectionModel
+        if(!string.IsNullOrEmpty(email)) 
         {
-            ConnectionId = connection,
-            ClientEmail = email
-        };
+            var result = _client.GetConnectionId(email);
 
-        await _client.CreateAsync(model);
+            if (result != null)
+            {
+                _client.UpdateConnection(email, connection);
+            }
+            else
+            {
+                var model = new ClientConnectionModel
+                {
+                    ConnectionId = connection,
+                    ClientEmail = email
+                };
+
+                await _client.CreateAsync(model);
+            }
+        }
+        
+
+        var json = await _redisService.GetValueAsync(clientEmail ?? email);
+        ChatDataDTO responseObject = new ChatDataDTO();
+
+        if (!string.IsNullOrEmpty(json))
+        {
+            responseObject = System.Text.Json.JsonSerializer.Deserialize<ChatDataDTO>(json);
+        }
+        
+        await Clients.Caller.SendAsync("ReceiveMessage", responseObject);
 
         await base.OnConnectedAsync();
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        var result = await _client.DeleteByConnectionId(Context.ConnectionId);
+        var email = await _client.GetEmailAsync(Context.ConnectionId);
+        await _redisService.DeleteAsync(email);
+        await _client.DeleteByConnectionId(Context.ConnectionId);
         await base.OnDisconnectedAsync(exception);
     }
 

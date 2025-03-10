@@ -27,13 +27,32 @@ public class ClientConnectionService(IDbConnectionManager connection) : IClientC
         return query;
     }
 
-    public async Task<string> GetConnectionId(string email)
+    public async Task<string?> GetConnectionId(string email)
     {
         var query = _query.Query(TableName)
             .Where("client_email", email)
             .Select("connection_id")
             .OrderByDesc("created_at");
 
-        return await _query.FirstOrDefaultAsync<string>(query);
+        var result = await _query.FirstOrDefaultAsync<string>(query);
+        return result;
+    }
+
+    public async Task<string> GetEmailAsync(string connectionId)
+    {
+        var query = _query.Query(TableName)
+            .Where("client_email", connectionId)
+            .Select("connection_id")
+            .OrderByDesc("created_at");
+
+        var result = await _query.FirstOrDefaultAsync<string>(query);
+        return result;
+    }
+
+    public int UpdateConnection(string email, string connectionId)
+    {
+        return _query.Query(TableName)
+            .Where("client_email", email)
+            .Update( new { connection_id = connectionId});
     }
 }

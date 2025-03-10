@@ -11,6 +11,8 @@ namespace EMDR42Chat.Infrastructure.Services.Interfaces;
 public interface IClientConnectionService
 {
     public Task<int> CreateAsync(ClientConnectionModel model);
-    public Task<string> GetConnectionId(string email);
+    public Task<string?> GetConnectionId(string email);
     public Task<int> DeleteByConnectionId(string connectionId);
+    public Task<string> GetEmailAsync(string connectionId);
+    public int UpdateConnection(string email, string connectionId);
 }
