@@ -49,7 +49,7 @@ public static class AddServiceExtensions
         services.AddSwaggerGen(c =>
             {
                 c.EnableAnnotations();
-                //c.AddServer(new OpenApiServer { Url = "/api/at" });
+                c.AddServer(new OpenApiServer { Url = "/api/ch" });
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Repositories", Version = "v2024" });
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
