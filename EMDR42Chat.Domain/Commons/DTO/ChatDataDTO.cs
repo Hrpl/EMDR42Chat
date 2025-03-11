@@ -19,4 +19,9 @@ public class ChatDataDTO
     public int Color { get; set; } = 1;
     public int ColorCenter { get; set; } = 1;
     public int Background { get; set; } = 1;
+
+    public int SoundMode { get; set; } = 2;
+
+    public int Volume { get; set; } = 100;
+    public int Effect { get; set; } = 4;
 }
