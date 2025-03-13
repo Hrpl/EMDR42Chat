@@ -24,4 +24,5 @@ public class ChatDataDTO
 
     public int Volume { get; set; } = 100;
     public int Effect { get; set; } = 4;
+    public int View {  get; set; } = 2;
 }
