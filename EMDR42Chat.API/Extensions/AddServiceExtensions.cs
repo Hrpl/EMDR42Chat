@@ -26,7 +26,7 @@ public static class AddServiceExtensions
 
     public static void AddRedis(this IServiceCollection services)
     {
-        var options = new ConfigurationOptions
+       var options = new ConfigurationOptions
         {
             EndPoints = { Environment.GetEnvironmentVariable("REDIS_HOST") },
             AbortOnConnectFail = false, // Не прерывать подключение при ошибке
@@ -89,5 +89,6 @@ public static class AddServiceExtensions
         services.AddScoped<IDbConnectionManager, DbConnectionManager>();
         services.AddScoped<IClientConnectionService, ClientConnectionService>();
         services.AddScoped<IRedisService, RedisService>();
+        services.AddScoped<ITherapeftClientsService, TherapeftClientsService>();
     }
 }

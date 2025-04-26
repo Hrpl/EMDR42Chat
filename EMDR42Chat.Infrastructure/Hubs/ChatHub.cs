@@ -1,16 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using Newtonsoft.Json;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using System.Diagnostics;
-using System.Collections.Concurrent;
-using System.Runtime.InteropServices;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Text;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using EMDR42Chat.Infrastructure.Services.Interfaces;
 using EMDR42Chat.Domain.Commons.DTO;
@@ -19,9 +8,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Hubs;
 
-public class ChatHub(IClientConnectionService client, IRedisService redisService, ILogger<ChatHub> logger) : Hub
+public class ChatHub(IClientConnectionService client, IRedisService redisService, ITherapeftClientsService therapeftClientsService, ILogger<ChatHub> logger) : Hub
 {
     private readonly IClientConnectionService _client = client;
+    private readonly ITherapeftClientsService _therapeftClientsService = therapeftClientsService ?? throw new ArgumentNullException(nameof(therapeftClientsService));
     private readonly ILogger<ChatHub> _logger = logger;
     private readonly IRedisService _redisService = redisService ?? throw new ArgumentNullException(nameof(redisService));
 
@@ -34,35 +24,59 @@ public class ChatHub(IClientConnectionService client, IRedisService redisService
         await this.Clients.Client(connectionId).SendAsync("ReceiveMessage", request);
     }
 
-    
+    public async Task SendEmotion(ChatDataDTO request)
+    {
+        var connection = Context.ConnectionId;
+
+        var email = await _client.GetEmailAsync(connection);
+
+        var therapeftEmail = await _therapeftClientsService.Get(email);
+
+        var connectiondTherapeft = await _client.GetConnectionId(therapeftEmail);
+
+        await this.Clients.Client(connectiondTherapeft).SendAsync("ReceiveEmotion", request);
+    }
+
     public override async Task OnConnectedAsync()
     {
         //параметр запроса у клиента
         var email = Context.GetHttpContext().Request.Query["email"].ToString();
         //параметр запроса психотерапевта
         var clientEmail = Context.GetHttpContext().Request.Query["client-email"].ToString();
+        var specialistEmail = Context.GetHttpContext().Request.Query["specialist-email"].ToString();
 
         var connection = Context.ConnectionId;
-        if(!string.IsNullOrEmpty(email)) 
+
+        var savedEmail = email ?? specialistEmail;
+
+        var result = await _client.GetConnectionId(savedEmail);
+
+        if (result != null)
         {
-            var result = await _client.GetConnectionId(email);
-
-            if (result != null)
-            {
-                _client.UpdateConnection(email, connection);
-            }
-            else
-            {
-                var model = new ClientConnectionModel
-                {
-                    ConnectionId = connection,
-                    ClientEmail = email
-                };
-
-                await _client.CreateAsync(model);
-            }
+            _client.UpdateConnection(savedEmail, connection);
         }
-        
+        else
+        {
+            var model = new ClientConnectionModel
+            {
+                ConnectionId = connection,
+                ClientEmail = savedEmail
+            };
+
+            await _client.CreateAsync(model);
+        }
+
+
+        if (!string.IsNullOrEmpty(specialistEmail) && !string.IsNullOrEmpty(clientEmail))
+        {
+            var model = new TherapeftClientsModel
+            {
+                ClientEmail = clientEmail,
+                TherapeftEmail = specialistEmail
+            };
+
+            await _therapeftClientsService.Create(model);
+        }
 
         var json = await _redisService.GetValueAsync(clientEmail ?? email);
         ChatDataDTO responseObject = new ChatDataDTO();
@@ -71,7 +85,7 @@ public class ChatHub(IClientConnectionService client, IRedisService redisService
         {
             responseObject = System.Text.Json.JsonSerializer.Deserialize<ChatDataDTO>(json);
         }
-        
+
         await Clients.Caller.SendAsync("InitialData", responseObject);
 
         await base.OnConnectedAsync();
@@ -85,7 +99,7 @@ public class ChatHub(IClientConnectionService client, IRedisService redisService
             await _client.DeleteByConnectionId(Context.ConnectionId);
             await _redisService.DeleteAsync(email);
         }
-        
+
         await base.OnDisconnectedAsync(exception);
     }
 
