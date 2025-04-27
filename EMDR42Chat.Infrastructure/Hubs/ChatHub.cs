@@ -39,56 +39,64 @@ public class ChatHub(IClientConnectionService client, IRedisService redisService
 
     public override async Task OnConnectedAsync()
     {
-        //параметр запроса у клиента
-        var email = Context.GetHttpContext().Request.Query["email"].ToString();
-        //параметр запроса психотерапевта
-        var clientEmail = Context.GetHttpContext().Request.Query["client-email"].ToString();
-        var specialistEmail = Context.GetHttpContext().Request.Query["specialist-email"].ToString();
-
-        var connection = Context.ConnectionId;
-
-        var savedEmail = email ?? specialistEmail;
-
-        var result = await _client.GetConnectionId(savedEmail);
-
-        if (result != null)
+        try
         {
-            _client.UpdateConnection(savedEmail, connection);
-        }
-        else
-        {
-            var model = new ClientConnectionModel
+            //параметр запроса у клиента
+            var email = Context.GetHttpContext().Request.Query["email"].ToString();
+            //параметр запроса психотерапевта
+            var clientEmail = Context.GetHttpContext().Request.Query["client-email"].ToString();
+            var specialistEmail = Context.GetHttpContext().Request.Query["specialist-email"].ToString();
+
+            var connection = Context.ConnectionId;
+
+            var savedEmail = email ?? specialistEmail;
+
+            var result = await _client.GetConnectionId(savedEmail);
+
+            if (result != null)
             {
-                ConnectionId = connection,
-                ClientEmail = savedEmail
-            };
-
-            await _client.CreateAsync(model);
-        }
-
-
-        if (!string.IsNullOrEmpty(specialistEmail) && !string.IsNullOrEmpty(clientEmail))
-        {
-            var model = new TherapeftClientsModel
+                _client.UpdateConnection(savedEmail, connection);
+            }
+            else
             {
-                ClientEmail = clientEmail,
-                TherapeftEmail = specialistEmail
-            };
+                var model = new ClientConnectionModel
+                {
+                    ConnectionId = connection,
+                    ClientEmail = savedEmail
+                };
 
-            await _therapeftClientsService.Create(model);
+                await _client.CreateAsync(model);
+            }
+
+
+            if (!string.IsNullOrEmpty(specialistEmail) && !string.IsNullOrEmpty(clientEmail))
+            {
+                var model = new TherapeftClientsModel
+                {
+                    ClientEmail = clientEmail,
+                    TherapeftEmail = specialistEmail
+                };
+
+                await _therapeftClientsService.Create(model);
+            }
+
+            var json = await _redisService.GetValueAsync(clientEmail ?? email);
+            ChatDataDTO responseObject = new ChatDataDTO();
+
+            if (!string.IsNullOrEmpty(json))
+            {
+                responseObject = System.Text.Json.JsonSerializer.Deserialize<ChatDataDTO>(json);
+            }
+
+            await Clients.Caller.SendAsync("InitialData", responseObject);
+
+            await base.OnConnectedAsync();
         }
-
-        var json = await _redisService.GetValueAsync(clientEmail ?? email);
-        ChatDataDTO responseObject = new ChatDataDTO();
-
-        if (!string.IsNullOrEmpty(json))
+        catch (Exception ex)
         {
-            responseObject = System.Text.Json.JsonSerializer.Deserialize<ChatDataDTO>(json);
+            _logger.LogError($"Произошла ошибка: {ex.Message}");
         }
-
-        await Clients.Caller.SendAsync("InitialData", responseObject);
-
-        await base.OnConnectedAsync();
+        
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
