@@ -41,8 +41,8 @@ public class ClientConnectionService(IDbConnectionManager connection) : IClientC
     public async Task<string> GetEmailAsync(string connectionId)
     {
         var query = _query.Query(TableName)
-            .Where("client_email", connectionId)
-            .Select("connection_id")
+            .Where("connection_id", connectionId)
+            .Select("client_email")
             .OrderByDesc("created_at");
 
         var result = await _query.FirstOrDefaultAsync<string>(query);
