@@ -55,8 +55,10 @@ public class ChatHub(IClientConnectionService client, IRedisService redisService
             var specialistEmail = Context.GetHttpContext().Request.Query["specialist-email"].ToString();
 
             var connection = Context.ConnectionId;
+            string savedEmail = "";
 
-            var savedEmail = email ?? specialistEmail;
+            if (string.IsNullOrEmpty(email)) savedEmail = specialistEmail;
+            else savedEmail = email;
 
             var result = await _client.GetConnectionId(savedEmail);
 
