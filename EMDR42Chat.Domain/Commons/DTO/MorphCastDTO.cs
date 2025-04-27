@@ -18,5 +18,5 @@ public class MorphCastDTO
     public int Sad { get; set; }
     public int Surprise { get; set; }
     public int Neutral { get; set; }
-    public int AgeValue { get; set; }
+    public int Age { get; set; }
 }
