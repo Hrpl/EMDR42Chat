@@ -26,15 +26,22 @@ public class ChatHub(IClientConnectionService client, IRedisService redisService
 
     public async Task SendEmotion(MorphCastDTO request)
     {
-        var connection = Context.ConnectionId;
+        try
+        {
+            var connection = Context.ConnectionId;
 
-        var email = await _client.GetEmailAsync(connection);
+            var email = await _client.GetEmailAsync(connection);
 
-        var therapeftEmail = await _therapeftClientsService.Get(email);
+            var therapeftEmail = await _therapeftClientsService.Get(email);
 
-        var connectiondTherapeft = await _client.GetConnectionId(therapeftEmail);
+            var connectiondTherapeft = await _client.GetConnectionId(therapeftEmail);
 
-        await this.Clients.Client(connectiondTherapeft).SendAsync("ReceiveEmotion", request);
+            await this.Clients.Client(connectiondTherapeft).SendAsync("ReceiveEmotion", request);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Произошла ошибка: {ex.Message}");
+        }
     }
 
     public override async Task OnConnectedAsync()
