@@ -35,7 +35,7 @@ public class ChatHub(IClientConnectionService client, IRedisService redisService
             var therapeftEmail = await _therapeftClientsService.Get(email);
 
             var connectiondTherapeft = await _client.GetConnectionId(therapeftEmail);
-
+            _logger.LogDebug($"Номер соединения терапевта: {connectiondTherapeft}");
             await this.Clients.Client(connectiondTherapeft).SendAsync("ReceiveEmotion", request);
         }
         catch (Exception ex)
@@ -114,7 +114,7 @@ public class ChatHub(IClientConnectionService client, IRedisService redisService
             await _client.DeleteByConnectionId(Context.ConnectionId);
             await _redisService.DeleteAsync(email);
         }
-
+        //todo: удалять из таблицы therapeft_clients
         await base.OnDisconnectedAsync(exception);
     }
 
