@@ -26,7 +26,7 @@ public static class AddServiceExtensions
 
     public static void AddRedis(this IServiceCollection services)
     {
-       var options = new ConfigurationOptions
+        var options = new ConfigurationOptions
         {
             EndPoints = { Environment.GetEnvironmentVariable("REDIS_HOST") },
             AbortOnConnectFail = false, // Не прерывать подключение при ошибке
@@ -47,32 +47,32 @@ public static class AddServiceExtensions
     public static void AddOpenAPI(this IServiceCollection services)
     {
         services.AddSwaggerGen(c =>
-            {
-                c.EnableAnnotations();
-                c.AddServer(new OpenApiServer { Url = "/api/ch" });
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Repositories", Version = "v2024" });
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    Description = "Authorization using jwt token. Example: \"Bearer {token}\"",
-                    Name = "Authorization",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.ApiKey
-                });
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
         {
-            new OpenApiSecurityScheme
+            c.EnableAnnotations();
+            c.AddServer(new OpenApiServer { Url = "/api/ch" });
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Repositories", Version = "v2024" });
+            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] { }
-        }
-    });
+                Description = "Authorization using jwt token. Example: \"Bearer {token}\"",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey
             });
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    new string[] { }
+                }
+            });
+        });
     }
 
     public static void AddMapster(this IServiceCollection services)

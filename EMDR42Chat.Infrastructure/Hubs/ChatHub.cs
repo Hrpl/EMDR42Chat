@@ -24,7 +24,7 @@ public class ChatHub(IClientConnectionService client, IRedisService redisService
         await this.Clients.Client(connectionId).SendAsync("ReceiveMessage", request);
     }
 
-    public async Task SendEmotion(ChatDataDTO request)
+    public async Task SendEmotion(MorphCastDTO request)
     {
         var connection = Context.ConnectionId;
 
