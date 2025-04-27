@@ -35,7 +35,7 @@ public class ChatHub(IClientConnectionService client, IRedisService redisService
             var therapeftEmail = await _therapeftClientsService.Get(email);
 
             var connectiondTherapeft = await _client.GetConnectionId(therapeftEmail);
-            _logger.LogDebug($"Номер соединения терапевта: {connectiondTherapeft}");
+            _logger.LogError($"Номер соединения терапевта: {connectiondTherapeft}");
             await this.Clients.Client(connectiondTherapeft).SendAsync("ReceiveEmotion", request);
         }
         catch (Exception ex)
@@ -66,15 +66,17 @@ public class ChatHub(IClientConnectionService client, IRedisService redisService
             }
             else
             {
-                var model = new ClientConnectionModel
+                if (!string.IsNullOrEmpty(savedEmail))
                 {
-                    ConnectionId = connection,
-                    ClientEmail = savedEmail
-                };
+                    var model = new ClientConnectionModel
+                    {
+                        ConnectionId = connection,
+                        ClientEmail = savedEmail
+                    };
 
-                await _client.CreateAsync(model);
+                    await _client.CreateAsync(model);
+                }
             }
-
 
             if (!string.IsNullOrEmpty(specialistEmail) && !string.IsNullOrEmpty(clientEmail))
             {
