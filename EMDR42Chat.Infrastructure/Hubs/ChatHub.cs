@@ -117,8 +117,10 @@ public class ChatHub(IClientConnectionService client, IRedisService redisService
         {
             await _client.DeleteByConnectionId(Context.ConnectionId);
             await _redisService.DeleteAsync(email);
+
+            _therapeftClientsService.Delete(email);
         }
-        //todo: удалять из таблицы therapeft_clients
+
         await base.OnDisconnectedAsync(exception);
     }
 

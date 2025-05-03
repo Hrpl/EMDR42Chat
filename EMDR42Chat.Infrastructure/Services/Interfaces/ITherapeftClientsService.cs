@@ -13,4 +13,5 @@ public interface ITherapeftClientsService
     public Task<string> Get(string clientEmail);
     public Task<int> Create(TherapeftClientsModel model);
     public void Update(string clientEmail, string therapeftEmail);
+    public void Delete(string therapeftEmail);
 }

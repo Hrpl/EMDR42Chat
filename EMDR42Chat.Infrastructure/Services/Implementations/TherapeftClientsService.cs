@@ -24,6 +24,11 @@ public class TherapeftClientsService(IDbConnectionManager connection) : ITherape
         return await _query.ExecuteAsync(query);
     }
 
+    public void Delete(string therapeftEmail)
+    {
+        _query.Query(TableName).Where("therapeft_email", therapeftEmail).Delete();
+    }
+
     public async Task<string> Get(string clientEmail)
     {
         var query = _query.Query(TableName)
