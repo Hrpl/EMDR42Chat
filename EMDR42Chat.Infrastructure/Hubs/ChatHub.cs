@@ -17,11 +17,19 @@ public class ChatHub(IClientConnectionService client, IRedisService redisService
 
     public async Task SendMessageToUser(ChatDataDTO request, string email)
     {
-        var connectionId = await _client.GetConnectionId(email);
-        string json = System.Text.Json.JsonSerializer.Serialize(request);
+        try
+        {
 
-        await _redisService.SetValueAsync(email, json);
-        await this.Clients.Client(connectionId).SendAsync("ReceiveMessage", request);
+            var connectionId = await _client.GetConnectionId(email);
+            string json = System.Text.Json.JsonSerializer.Serialize(request);
+
+            await _redisService.SetValueAsync(email, json);
+            await this.Clients.Client(connectionId).SendAsync("ReceiveMessage", request);
+        }
+        catch (Exception)
+        {
+            _logger.LogError($"Произошла ошибка: {ex.Message}");
+        }
     }
 
     public async Task SendEmotion(MorphCastDTO request)
@@ -112,16 +120,24 @@ public class ChatHub(IClientConnectionService client, IRedisService redisService
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        var email = await _client.GetEmailAsync(Context.ConnectionId);
-        if (email != null)
+        try
         {
-            await _client.DeleteByConnectionId(Context.ConnectionId);
-            await _redisService.DeleteAsync(email);
 
-            _therapeftClientsService.Delete(email);
+            var email = await _client.GetEmailAsync(Context.ConnectionId);
+            if (email != null)
+            {
+                await _client.DeleteByConnectionId(Context.ConnectionId);
+                await _redisService.DeleteAsync(email);
+
+                _therapeftClientsService.Delete(email);
+            }
+
+            await base.OnDisconnectedAsync(exception);
         }
-
-        await base.OnDisconnectedAsync(exception);
+        catch (Exception)
+        {
+            _logger.LogError($"Произошла ошибка: {ex.Message}");
+        }
     }
 
 }
