@@ -32,7 +32,7 @@ public class ChatHub(IClientConnectionService client, IRedisService redisService
         }
     }
 
-    public async Task SendEmotion(MorphCastDTO request)
+    public async Task SendEmotion(MorphCastDTO? request)
     {
         try
         {
