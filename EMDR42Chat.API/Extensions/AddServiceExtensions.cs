@@ -31,7 +31,11 @@ public static class AddServiceExtensions
             EndPoints = { Environment.GetEnvironmentVariable("REDIS_HOST") },
             AbortOnConnectFail = false, // Не прерывать подключение при ошибке
             ConnectRetry = 5, // Количество попыток подключения
-            ConnectTimeout = 5000 // Таймаут подключения
+            ReconnectRetryPolicy = new ExponentialRetry(5000), // Политика повторного подключения
+            ConnectTimeout = 10000, // Увеличили таймаут подключения
+            SyncTimeout = 5000, // Таймаут синхронных операций
+            AsyncTimeout = 5000, // Таймаут асинхронных операций
+            KeepAlive = 180, // Keep-alive пакеты каждые 180 секунд
         };
 
         // Регистрируем ConnectionMultiplexer как Singleton
