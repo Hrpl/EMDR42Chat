@@ -26,7 +26,7 @@ public class ChatHub(IClientConnectionService client, IRedisService redisService
             await _redisService.SetValueAsync(email, json);
             await this.Clients.Client(connectionId).SendAsync("ReceiveMessage", request);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             _logger.LogError($"Произошла ошибка: {ex.Message}");
         }
@@ -134,7 +134,7 @@ public class ChatHub(IClientConnectionService client, IRedisService redisService
 
             await base.OnDisconnectedAsync(exception);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             _logger.LogError($"Произошла ошибка: {ex.Message}");
         }
