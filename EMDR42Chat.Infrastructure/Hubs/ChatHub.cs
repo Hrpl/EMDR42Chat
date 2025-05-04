@@ -23,7 +23,7 @@ public class ChatHub(IClientConnectionService client, IRedisService redisService
             var connectionId = await _client.GetConnectionId(email);
             string json = System.Text.Json.JsonSerializer.Serialize(request);
 
-            _logger.LogTrace($"Id соединения: {connectionId}, сообщение {json}");
+            _logger.LogInformation($"Id соединения: {connectionId}, сообщение {json}");
 
             await _redisService.SetValueAsync(email, json);
             await this.Clients.Client(connectionId).SendAsync("ReceiveMessage", request);
